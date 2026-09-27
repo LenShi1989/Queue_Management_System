@@ -1,0 +1,43 @@
+# ---- build stage ----
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+# 先只還原 csproj 以善用 Docker layer cache
+COPY Directory.Build.props ./
+COPY backend/Queue.Domain/Queue.Domain.csproj backend/Queue.Domain/
+COPY backend/Queue.Application/Queue.Application.csproj backend/Queue.Application/
+COPY backend/Queue.Infrastructure/Queue.Infrastructure.csproj backend/Queue.Infrastructure/
+COPY backend/Queue.Api/Queue.Api.csproj backend/Queue.Api/
+RUN dotnet restore backend/Queue.Api/Queue.Api.csproj
+
+COPY backend/ backend/
+RUN dotnet publish backend/Queue.Api/Queue.Api.csproj \
+    -c Release \
+    -o /app/publish \
+    --no-restore \
+    /p:UseAppHost=false
+
+# ---- runtime stage ----
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+WORKDIR /app
+
+# curl 僅供 HEALTHCHECK 使用
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# 非 root 執行
+RUN adduser --system --group --no-create-home queue
+COPY --from=build /app/publish ./
+USER queue
+
+ENV ASPNETCORE_URLS=http://+:8080 \
+    ASPNETCORE_ENVIRONMENT=Production \
+    DOTNET_gcServer=1
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+    CMD curl -fsS http://localhost:8080/health/ready || exit 1
+
+ENTRYPOINT ["/app/Queue.Api"]

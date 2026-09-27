@@ -1,0 +1,48 @@
+# ---- .NET / Visual Studio ----
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+TestResults/
+coverage*.json
+coverage*.xml
+*.coverage
+*.trx
+
+# ---- Node / 前端 ----
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.eslintcache
+
+# ---- 環境設定與密鑈 ----
+.env
+.env.*
+!.env.example
+appsettings.Development.json
+appsettings.Production.json
+*.pfx
+*.key
+secrets.json
+
+# ---- 執行期產物 ----
+*.db
+*.db-shm
+*.db-wal
+*.log
+
+# ---- 資料庫備份 ----
+database/backups/
+deploy/**/*.tar
+deploy/**/*.gz

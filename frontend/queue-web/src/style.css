@@ -1,0 +1,77 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-brand-50: #eef6ff;
+  --color-brand-100: #d9ebff;
+  --color-brand-200: #bcdcff;
+  --color-brand-300: #8ec6ff;
+  --color-brand-400: #59a5ff;
+  --color-brand-500: #3381fb;
+  --color-brand-600: #1b61f0;
+  --color-brand-700: #144bdc;
+  --color-brand-800: #173eb2;
+  --color-brand-900: #19398c;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-slate-100 text-slate-800 antialiased;
+    font-family:
+      'Inter', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+  }
+}
+
+/* Tailwind v4：自訂 utility 才能被 @apply 套用 */
+@utility btn {
+  @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2
+    text-sm font-medium transition
+    disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border border-slate-200 bg-white shadow-sm;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800;
+  }
+
+  .btn-secondary {
+    @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50;
+  }
+
+  .btn-success {
+    @apply btn bg-emerald-600 text-white hover:bg-emerald-700;
+  }
+
+  .btn-warning {
+    @apply btn bg-amber-500 text-white hover:bg-amber-600;
+  }
+
+  .btn-danger {
+    @apply btn bg-rose-600 text-white hover:bg-rose-700;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3 text-base;
+  }
+
+  .input {
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm
+      focus:border-brand-500 focus:ring-2 focus:ring-brand-100 focus:outline-none
+      disabled:bg-slate-100;
+  }
+
+  .label {
+    @apply mb-1 block text-sm font-medium text-slate-700;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+  }
+}

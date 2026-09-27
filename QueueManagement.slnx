@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/backend/">
+    <Project Path="backend/Queue.Api/Queue.Api.csproj" />
+    <Project Path="backend/Queue.Application/Queue.Application.csproj" />
+    <Project Path="backend/Queue.Domain/Queue.Domain.csproj" />
+    <Project Path="backend/Queue.Infrastructure/Queue.Infrastructure.csproj" />
+    <Project Path="backend/Queue.Tests/Queue.Tests.csproj" />
+  </Folder>
+</Solution>

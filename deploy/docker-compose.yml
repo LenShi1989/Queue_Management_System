@@ -1,0 +1,81 @@
+name: queue-management
+
+services:
+  db:
+    image: postgres:18-alpine
+    container_name: queue-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: ${TZ:-Asia/Taipei}
+      # 繁體中文排序規則
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [queue-net]
+
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/docker/Dockerfile.api
+    container_name: queue-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      TZ: ${TZ:-Asia/Taipei}
+
+      # §40 連線字串（以環境變數覆寫，避免硬編碼）
+      ConnectionStrings__DefaultConnection: >-
+        Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Include Error Detail=false;Pooling=true;Maximum Pool Size=100
+
+      # §40 JWT / QR / 佇列設定
+      Jwt__Secret: ${JWT_SECRET}
+      Jwt__Issuer: ${JWT_ISSUER:-QueueManagement}
+      Jwt__Audience: ${JWT_AUDIENCE:-QueueWeb}
+      Jwt__ExpireMinutes: ${JWT_EXPIRE_MINUTES:-480}
+
+      Qr__SigningKey: ${QR_SIGNING_KEY}
+      Qr__TokenLifetimeHours: ${QR_TOKEN_LIFETIME_HOURS:-72}
+      Qr__PublicBaseUrl: ${PUBLIC_BASE_URL}
+
+      Queue__DefaultAverageServiceMinutes: ${QUEUE_DEFAULT_SERVICE_MINUTES:-5}
+      Queue__AgingEnabled: ${QUEUE_AGING_ENABLED:-false}
+      Queue__AgingFactorMinutes: ${QUEUE_AGING_FACTOR_MINUTES:-10}
+      Queue__MaxRecallCount: ${QUEUE_MAX_RECALL_COUNT:-2}
+
+      Redis__ConnectionString: ${REDIS_CONNECTION_STRING:-}
+
+      # 種子資料透過 Migration 的 HasData 套用，無需額外開關
+      Database__MigrateOnStartup: ${MIGRATE_ON_STARTUP:-true}
+    networks: [queue-net]
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/docker/Dockerfile.web
+    container_name: queue-web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    networks: [queue-net]
+
+volumes:
+  db-data:
+
+networks:
+  queue-net:
+    driver: bridge

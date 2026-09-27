@@ -1,0 +1,36 @@
+# ---- .NET ----
+**/bin/
+**/obj/
+**/logs/
+**/*.user
+.vs/
+TestResults/
+
+# ---- 前端 ----
+**/node_modules/
+**/dist/
+**/.vite/
+**/*.local
+
+# ---- 環境設定與密鑈（絕不可進 image layer）----
+**/.env
+**/.env.*
+!**/.env.example
+**/appsettings.Development.json
+**/appsettings.Production.json
+**/*.pfx
+**/*.key
+secrets.json
+
+# ---- 文件與版本控制 ----
+.git/
+.gitignore
+.github/
+docs/
+*.md
+README.md
+
+# ---- 其他 ----
+*.log
+*.db
+database/backups/
